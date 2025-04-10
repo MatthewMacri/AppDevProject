@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181754581464",
+    "project_id": "aplicationdev2project",
+    "storage_bucket": "aplicationdev2project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181754581464:android:73ba16209ebc73566b62ad",
+        "android_client_info": {
+          "package_name": "com.vanier.appdev2project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAycnbMMRbR8mZYEJlATtUBvut6HeDNJR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
