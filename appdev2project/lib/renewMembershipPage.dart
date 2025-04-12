@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'memberMainMenuPage.dart';
 
 class RenewMembershipPage extends StatefulWidget {
   String docId;
@@ -29,12 +32,15 @@ class _RenewMembershipPageState extends State<RenewMembershipPage> {
   }
 
   void _renewMembership() async {
+
     try {
 
-        DateTime newExpireDate = expireDate.add(Duration(days: 365));
+      DateTime today = DateTime.now();
+      DateTime baseDate = expireDate.isBefore(today) ? today : expireDate;
+      DateTime newExpireDate = baseDate.add(Duration(days: 365));
 
         await FirebaseFirestore.instance.collection('users').doc(docId).update({
-          'expireDate': Timestamp.fromDate(newExpireDate), // Convert DateTime to Timestamp
+          'expireDate': Timestamp.fromDate(newExpireDate),
         });
 
         setState(() {
@@ -55,17 +61,22 @@ class _RenewMembershipPageState extends State<RenewMembershipPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("MMS Gym Application, Renew Membership", style: TextStyle(fontSize: 15)
-      ), ),
+          title: Text("MMS Gym Application, Renew Membership", style: TextStyle(fontSize: 15),),
+          backgroundColor: Colors.grey,
+      ),
       body: Center(
         child: Column(
           children: [
             if (canRenew)
               Column(
                 children: [
+                  SizedBox(height: 20),
                   Text("Please enter your credit card details to renew your membership.", style: TextStyle(fontSize: 16)),
                   Text("Cost: \$100 for a year.", style: TextStyle(fontSize: 14)),
                   SizedBox(height: 20),
+                  Container( width: 300, height: 300, decoration: BoxDecoration(color: CupertinoColors.lightBackgroundGray, borderRadius: BorderRadius.circular(10)),
+                      padding: EdgeInsets.all(10),
+                      child: Column( children: [
                   TextField(
                     controller: fullName,
                     decoration: InputDecoration(labelText: "Full Name on Credit Card"),
@@ -85,13 +96,30 @@ class _RenewMembershipPageState extends State<RenewMembershipPage> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: _renewMembership,
+                    onPressed:() {
+                      if (fullName.text.trim().isEmpty ||
+                          creditCardNumber.text.trim().isEmpty ||
+                          cvv.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Please fill in all credit card fields."),
+                        ));
+                        return;
+                      }
+                      _renewMembership();
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => memberMainMenuPage(docId)));
+                    },
                     child: Text("Renew Membership"),
-                  ),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(200, 44),
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),),),
+                  ],))
                 ],
               )
             else
-            // Show message if cannot renew
               Column(
                 children: [
                   Text(

@@ -1,8 +1,11 @@
+import 'package:appdev2project/memberAlterAccount.dart';
 import 'package:appdev2project/renewMembershipPage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+
+import 'loginpage.dart';
 
 class memberMainMenuPage extends StatefulWidget {
   String docId;
@@ -27,6 +30,11 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
     DocumentSnapshot snapshot = await firestore.collection('users').doc(docId).get();
 
       Map<String, dynamic> currentMember = snapshot.data() as Map<String, dynamic>;
+
+      if ((currentMember['expireDate'] as Timestamp).toDate().isBefore(DateTime.now()) && currentMember['status'] != "expired") {
+        await firestore.collection('users').doc(docId).update({'status': 'expired'});
+        currentMember['status'] = 'expired';
+      }
       setState(() {
       userId = currentMember['userId'];
       fullName = currentMember['fullName'];
@@ -116,6 +124,20 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
       appBar: AppBar(
         title: Text("MMS Gym Application, Welcome ${fullName}", style: TextStyle(fontSize: 15),),
         backgroundColor: Colors.grey,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+                    (Route<dynamic> route) => false,
+              );
+            },
+          ),
+        ],
+
       ),
       body: Center(
         child: Column(
@@ -123,16 +145,42 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
             SizedBox(height: 15,),
             ElevatedButton(onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => RenewMembershipPage(docId, (daysTillExpired), expireDate )));
-            }, child: Text("Renew Membsership")),
+            }, child: Text("Renew Membsership"),
+              style: ElevatedButton.styleFrom(
+              minimumSize: Size(200, 44),
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),),),
             SizedBox(height: 15,),
             ElevatedButton(onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MemberAlterAccount(docId),
+                ),
+              );
 
-            }, child: Text("Alter Account")),
+            }, child: Text("Alter Account"), style: ElevatedButton.styleFrom(
+              minimumSize: Size(200, 44),
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),),),
+
             SizedBox(height: 15,),
             ElevatedButton(onPressed: () {
 
             }
-            , child: Text("View Location on Map")),
+            , child: Text("View Location on Map"), style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 44),
+                backgroundColor: Colors.grey,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),),),
             SizedBox(height: 15,),
             Text("Current Membership Status is: $status"),
             SizedBox(height: 15,),

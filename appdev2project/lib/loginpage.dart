@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 300,
                 child: Column(
                   children: [
-                    Text("user ID:"),
+                    Text("User ID:"),
                     TextField(
                       controller: userId,
                     ),
@@ -117,9 +117,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text("Password:"),
                     TextField(
                       controller: password,
+                      obscureText: true,
                     ),
                     SizedBox(height: 10,),
-                    ElevatedButton(onPressed: login, child: Text("Login")),
+                    ElevatedButton(onPressed: login, child: Text("Login"),
+                      style: ElevatedButton.styleFrom(
+                    minimumSize: Size(200, 44),
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),),),
                     SizedBox(height: 10,)
                   ],
                 ),
