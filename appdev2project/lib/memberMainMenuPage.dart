@@ -122,7 +122,7 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("MMS Gym Application, Welcome ${fullName}", style: TextStyle(fontSize: 15),),
+        title: Text("MMS Gym Application \nWelcome, ${fullName}", style: TextStyle(fontSize: 15),),
         backgroundColor: Colors.grey,
         automaticallyImplyLeading: false,
         actions: [
@@ -144,7 +144,12 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
           children: [
             SizedBox(height: 15,),
             ElevatedButton(onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RenewMembershipPage(docId, (daysTillExpired), expireDate )));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RenewMembershipPage(docId, daysTillExpired, expireDate, "member"),
+                ),
+              );
             }, child: Text("Renew Membsership"),
               style: ElevatedButton.styleFrom(
               minimumSize: Size(200, 44),

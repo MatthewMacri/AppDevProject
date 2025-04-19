@@ -1,3 +1,4 @@
+import 'package:appdev2project/employeeMainMenuPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => memberMainMenuPage(userId),
+                  builder: (context) => EmployeeMainMenuPage(doc.id),
                 ),
               );
             }
