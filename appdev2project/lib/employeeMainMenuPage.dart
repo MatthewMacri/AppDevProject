@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:appdev2project/memberAlterAccount.dart';
 import 'package:appdev2project/renewMembershipPage.dart';
+import 'package:appdev2project/disableMemberAccount.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
@@ -181,6 +182,22 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
 
             }
               , child: Text("View Location on Map"), style: ElevatedButton.styleFrom(
+                minimumSize: Size(200, 44),
+                backgroundColor: Colors.grey,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),),),
+            SizedBox(height: 15,),
+            ElevatedButton(onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DisableMemberAccount(docId),
+                ),
+              );
+            }
+              , child: Text("Disable Membership"), style: ElevatedButton.styleFrom(
                 minimumSize: Size(200, 44),
                 backgroundColor: Colors.grey,
                 foregroundColor: Colors.black,
