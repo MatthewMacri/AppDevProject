@@ -1,9 +1,11 @@
+import 'package:appdev2project/employeeMainMenuPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'memberMainMenuPage.dart';
+import 'createMemberAccount.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,9 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
   Future<void> login() async {
-    String userId = this.userId.text;
-    String password = this.password.text;
-
+    String userId = this.userId.text.trim();
+    String password = this.password.text.trim();
 
     if (userId.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,20 +64,37 @@ class _LoginScreenState extends State<LoginScreen> {
         if (data != null && data is Map<String, dynamic>) {
           if (data['userId'] == userId && data['password'] == password) {
             found = true;
-            if(data['type'] == "member") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => memberMainMenuPage(doc.id)),
+
+            Timestamp expireTimestamp = data['expireDate'];
+            DateTime expireDate = expireTimestamp.toDate();
+            DateTime now = DateTime.now();
+
+            if (expireDate.isBefore(now)) {
+              await firestore.collection('users').doc(doc.id).update({
+                'status': 'expired',
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Membership has expired.")),
               );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => memberMainMenuPage(userId)),
-              );
+              return;
             }
 
+            if (data['type'] == "member") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => memberMainMenuPage(doc.id),
+                ),
+              );
+            } else if (data['type'] == "employee"){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EmployeeMainMenuPage(doc.id),
+                ),
+              );
+            }
             break;
           }
         }
@@ -88,21 +106,22 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print(e);
+      print("Login error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("An error occurred during login")),
+      );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("MMS Gym Application"),
-        backgroundColor: Colors.grey,
-      ),
-      body: Center(
-        child: Column(
+        appBar: AppBar(
+          title: Text("MMS Gym Application"),
+          backgroundColor: Colors.grey,
+        ),
+        body: Center(
+          child: Column(
             children: [
               SizedBox(height: 50,),
               Container(
@@ -122,26 +141,45 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: 10,),
                     ElevatedButton(onPressed: login, child: Text("Login"),
                       style: ElevatedButton.styleFrom(
-                    minimumSize: Size(200, 44),
-                      backgroundColor: Colors.grey,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),),),
-                    SizedBox(height: 10,)
+                        minimumSize: Size(200, 44),
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),),),
+                    SizedBox(height: 10,),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateMemberAccount()),
+                        );
+                      },
+                      child: Text('Create Account'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(200, 44),
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10,),
                   ],
                 ),
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: BorderRadius.circular(20),
-                  color: CupertinoColors.lightBackgroundGray
+                    borderRadius: BorderRadius.circular(20),
+                    color: CupertinoColors.lightBackgroundGray
                 ),
-              )
+              ),
+              SizedBox(height: 20,),
             ],
           ),
         )
-
-      );
+    );
   }
 }
 
