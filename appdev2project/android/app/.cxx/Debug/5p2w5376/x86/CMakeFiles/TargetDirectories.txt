@@ -1,0 +1,2 @@
+C:/Users/Admin/Documents/GitHub/AppDevProject/appdev2project/android/app/.cxx/Debug/5p2w5376/x86/CMakeFiles/edit_cache.dir
+C:/Users/Admin/Documents/GitHub/AppDevProject/appdev2project/android/app/.cxx/Debug/5p2w5376/x86/CMakeFiles/rebuild_cache.dir
