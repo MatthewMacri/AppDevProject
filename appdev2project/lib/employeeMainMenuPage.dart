@@ -32,17 +32,9 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
 
     Map<String, dynamic> currentMember = snapshot.data() as Map<String, dynamic>;
 
-    if ((currentMember['expireDate'] as Timestamp).toDate().isBefore(DateTime.now()) && currentMember['status'] != "expired") {
-      await firestore.collection('users').doc(docId).update({'status': 'expired'});
-      currentMember['status'] = 'expired';
-    }
     setState(() {
       userId = currentMember['userId'];
       fullName = currentMember['fullName'];
-      status = currentMember['status'];
-      expireDate = (currentMember['expireDate'] as Timestamp).toDate();
-      daysTillExpired = expireDate.difference(DateTime.now()).inDays;
-      daysTillExpired = (daysTillExpired < 0) ? 0 : daysTillExpired;
     });
   }
 
@@ -124,7 +116,7 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("MMS Gym Application \nWelcome, ${fullName}", style: TextStyle(fontSize: 15),),
+        title: Text("MMS Gym Application \nWelcome, $fullName", style: TextStyle(fontSize: 15),),
         backgroundColor: Colors.grey,
         automaticallyImplyLeading: false,
         actions: [
