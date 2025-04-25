@@ -65,33 +65,35 @@ class _LoginScreenState extends State<LoginScreen> {
           if (data['userId'] == userId && data['password'] == password) {
             found = true;
 
-            Timestamp expireTimestamp = data['expireDate'];
-            DateTime expireDate = expireTimestamp.toDate();
-            DateTime now = DateTime.now();
-
-            if (expireDate.isBefore(now)) {
-              await firestore.collection('users').doc(doc.id).update({
-                'status': 'expired',
-              });
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Membership has expired.")),
-              );
-              return;
-            }
-
-            if (data['type'] == "member") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => memberMainMenuPage(doc.id),
-                ),
-              );
-            } else if (data['type'] == "employee"){
+            if (data['type'] == "employee"){
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => EmployeeMainMenuPage(doc.id),
+                ),
+              );
+            }
+
+            if (data['type'] == "member") {
+              Timestamp expireTimestamp = data['expireDate'];
+              DateTime expireDate = expireTimestamp.toDate();
+              DateTime now = DateTime.now();
+
+              if (expireDate.isBefore(now)) {
+                await firestore.collection('users').doc(doc.id).update({
+                  'status': 'expired',
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Membership has expired.")),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => memberMainMenuPage(doc.id),
                 ),
               );
             }

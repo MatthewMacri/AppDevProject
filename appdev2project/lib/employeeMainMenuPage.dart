@@ -205,11 +205,8 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
                   borderRadius: BorderRadius.circular(6),
                 ),),),
             SizedBox(height: 15,),
-            Text("Current Membership Status is: $status"),
-            SizedBox(height: 15,),
-            Text("Your membership expires in ${daysTillExpired} days on ${expireDate.year}-${expireDate.month.toString()}-${expireDate.day.toString()}"),
-            SizedBox(height: 15,),
             Text("The gym is currently: ${_getGymStatus()} "),
+            SizedBox(height: 35),
 
             openingHours == null
                 ? Text("Loading opening hours...")
