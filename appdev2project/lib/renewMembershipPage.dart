@@ -1,59 +1,130 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:appdev2project/customDrawer.dart';
 import 'memberMainMenuPage.dart';
 
 class RenewMembershipPage extends StatefulWidget {
-  String docId;
-  int amountOfDays;
-  DateTime expireDate = DateTime.now();
-  RenewMembershipPage(this.docId ,this.amountOfDays, this.expireDate);
+  final String docId;
+  final int amountOfDays;
+  final DateTime expireDate;
+  final String userType;
+
+  RenewMembershipPage(this.docId, this.amountOfDays, this.expireDate, this.userType);
 
   @override
-  State<RenewMembershipPage> createState() => _RenewMembershipPageState(this.docId ,this.amountOfDays, this.expireDate);
+  State<RenewMembershipPage> createState() => _RenewMembershipPageState();
 }
 
 class _RenewMembershipPageState extends State<RenewMembershipPage> {
-  String docId;
-  int amountOfDays;
-  DateTime expireDate = DateTime.now();
+  String? selectedMemberDocId;
+  DateTime? selectedMemberExpireDate;
   bool canRenew = false;
-  _RenewMembershipPageState(this.docId, this.amountOfDays, this.expireDate );
+  List<QueryDocumentSnapshot> members = [];
 
   TextEditingController fullName = TextEditingController();
   TextEditingController creditCardNumber = TextEditingController();
   TextEditingController cvv = TextEditingController();
 
+  // Variables for Drawer
+  String userType = '';
+  String currentFullName = '';
+  String currentStatus = '';
+  int currentDaysTillExpired = 0;
+  DateTime currentExpireDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
-    canRenew = amountOfDays < 10;
+    fetchUserTypeAndDetails();
+
+    if (widget.userType == 'employee') {
+      fetchAllMembers();
+    } else {
+      selectedMemberDocId = widget.docId;
+      selectedMemberExpireDate = widget.expireDate;
+      canRenew = widget.amountOfDays < 10;
+    }
+  }
+
+  Future<void> fetchUserTypeAndDetails() async {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.docId)
+        .get();
+
+    Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+
+    int daysLeft = 0;
+    DateTime expDate = DateTime.now();
+
+    if(userType == "member") {
+      DateTime expDate = (userData['expireDate'] as Timestamp).toDate();
+      int daysLeft = expDate.difference(DateTime.now()).inDays;
+      daysLeft = (daysLeft < 0) ? 0 : daysLeft;
+    }
+
+    setState(() {
+      userType = userData['type'];
+      currentFullName = userData['fullName'];
+      currentStatus = userData['status'];
+      currentDaysTillExpired = daysLeft;
+      currentExpireDate = expDate;
+    });
+  }
+
+  Future<void> fetchAllMembers() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('type', isEqualTo: 'member')
+        .get();
+
+    setState(() {
+      members = snapshot.docs;
+    });
+  }
+
+  void _checkMemberRenewalStatus(DocumentSnapshot doc) {
+    Timestamp expireTimestamp = doc['expireDate'];
+    selectedMemberExpireDate = expireTimestamp.toDate();
+    selectedMemberDocId = doc.id;
+
+    final remainingDays = selectedMemberExpireDate!.difference(DateTime.now()).inDays;
+    setState(() {
+      canRenew = remainingDays < 10;
+    });
   }
 
   void _renewMembership() async {
-
     try {
+      if (selectedMemberExpireDate == null || selectedMemberDocId == null) return;
 
       DateTime today = DateTime.now();
-      DateTime baseDate = expireDate.isBefore(today) ? today : expireDate;
+      DateTime baseDate = selectedMemberExpireDate!.isBefore(today) ? today : selectedMemberExpireDate!;
       DateTime newExpireDate = baseDate.add(Duration(days: 365));
 
-        await FirebaseFirestore.instance.collection('users').doc(docId).update({
-          'expireDate': Timestamp.fromDate(newExpireDate),
-        });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(selectedMemberDocId)
+          .update({'expireDate': Timestamp.fromDate(newExpireDate)});
 
-        setState(() {
-          this.expireDate = newExpireDate;
-          this.amountOfDays += 365;
-        });
+      setState(() {
+        selectedMemberExpireDate = newExpireDate;
+        canRenew = false;
+      });
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Membership Renewed! New Expiry Date: ${newExpireDate.toLocal()}"),
-        ));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Membership Renewed! New Expiry: $newExpireDate"),
+      ));
 
+      if (widget.userType == "member") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => memberMainMenuPage(widget.docId)),
+        );
+      }
     } catch (e) {
-      print(e);
+      print("Error: $e");
     }
   }
 
@@ -61,89 +132,104 @@ class _RenewMembershipPageState extends State<RenewMembershipPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("MMS Gym Application, Renew Membership", style: TextStyle(fontSize: 15),),
-          backgroundColor: Colors.grey,
+        title: Text("Renew Membership"),
+        backgroundColor: Colors.grey,
       ),
-      body: Center(
-        child: Column(
+      drawer: AppDrawer(
+        docId: widget.docId,
+        userRole: widget.userType,
+        fullName: currentFullName,
+        status: currentStatus,
+        daysTillExpired: currentDaysTillExpired,
+        expireDate: currentExpireDate,
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: widget.userType == 'employee'
+            ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (canRenew)
-              Column(
-                children: [
-                  SizedBox(height: 20),
-                  Text("Please enter your credit card details to renew your membership.", style: TextStyle(fontSize: 16)),
-                  Text("Cost: \$100 for a year.", style: TextStyle(fontSize: 14)),
-                  SizedBox(height: 20),
-                  Container( width: 300, height: 300, decoration: BoxDecoration(color: CupertinoColors.lightBackgroundGray, borderRadius: BorderRadius.circular(10)),
-                      padding: EdgeInsets.all(10),
-                      child: Column( children: [
-                  TextField(
-                    controller: fullName,
-                    decoration: InputDecoration(labelText: "Full Name on Credit Card"),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: creditCardNumber,
-                    decoration: InputDecoration(labelText: "Credit Card Number"),
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: cvv,
-                    decoration: InputDecoration(labelText: "CVV"),
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed:() {
-                      if (fullName.text.trim().isEmpty ||
-                          creditCardNumber.text.trim().isEmpty ||
-                          cvv.text.trim().isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Please fill in all credit card fields."),
-                        ));
-                        return;
-                      }
-                      _renewMembership();
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => memberMainMenuPage(docId)));
-                    },
-                    child: Text("Renew Membership"),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(200, 44),
-                      backgroundColor: Colors.grey,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),),),
-                  ],))
-                ],
-              )
-            else
-              Column(
-                children: [
-                  Text(
-                    "Sorry, you cannot renew your membership.",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Memberships must be expiring within ten days to be eligible for renewal.",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "Memberships Expires is $amountOfDays days.",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            Text("Select a Member:"),
+            DropdownButton<String>(
+              value: selectedMemberDocId,
+              hint: Text("Choose Member"),
+              isExpanded: true,
+              items: members.map((doc) {
+                return DropdownMenuItem<String>(
+                  value: doc.id,
+                  child: Text(doc['userId']),
+                );
+              }).toList(),
+              onChanged: (value) {
+                final doc = members.firstWhere((d) => d.id == value);
+                _checkMemberRenewalStatus(doc);
+              },
+            ),
+            SizedBox(height: 20),
+            if (selectedMemberDocId != null && selectedMemberExpireDate != null)
+              _buildRenewSection()
           ],
-
         )
+            : _buildRenewSection(),
+      ),
+    );
+  }
+
+  Widget _buildRenewSection() {
+    return canRenew
+        ? Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text("Cost to renew for a Year: 120\$", style: TextStyle(fontSize: 20),),
+        SizedBox(height: 30,),
+        Text("Membership expires on: ${selectedMemberExpireDate?.toLocal()}"),
+        SizedBox(height: 10),
+        TextField(
+          controller: fullName,
+          decoration: InputDecoration(labelText: "Full Name on Credit Card"),
+        ),
+        TextField(
+          controller: creditCardNumber,
+          decoration: InputDecoration(labelText: "Credit Card Number"),
+          keyboardType: TextInputType.number,
+        ),
+        TextField(
+          controller: cvv,
+          decoration: InputDecoration(labelText: "CVV"),
+          obscureText: true,
+          keyboardType: TextInputType.number,
+        ),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            if (fullName.text.isEmpty || creditCardNumber.text.isEmpty || cvv.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Please fill in all fields")),
+              );
+              return;
+            }
+            _renewMembership();
+          },
+          child: Text("Renew Membership"),
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(200, 44),
+            backgroundColor: Colors.grey,
+            foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+        ),
+      ],
     )
+        : Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Membership cannot be renewed yet."),
+        Text("Must be within 10 days of expiry."),
+        if (selectedMemberExpireDate != null)
+          Text("Expires: ${selectedMemberExpireDate?.toLocal()}"),
+      ],
     );
   }
 }

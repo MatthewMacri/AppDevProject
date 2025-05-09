@@ -1,11 +1,13 @@
-import 'package:appdev2project/memberAlterAccount.dart';
-import 'package:appdev2project/renewMembershipPage.dart';
+import 'package:appdev2project/customDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
-import 'loginpage.dart';
+
+import 'baseLogin.dart';
+import 'unused/loginpage.dart';
 
 class memberMainMenuPage extends StatefulWidget {
   String docId;
@@ -43,6 +45,7 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
       daysTillExpired = expireDate.difference(DateTime.now()).inDays;
       daysTillExpired = (daysTillExpired < 0) ? 0 : daysTillExpired;
       });
+      createNotification();
   }
 
   Future<void> _fetchOpeningHours() async {
@@ -116,22 +119,46 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
     super.initState();
     _fetchData();
     _fetchOpeningHours();
+    requestNotificationPermissions();
+  }
+
+
+
+  void requestNotificationPermissions() {
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
+  }
+
+  void createNotification() {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 100 + DateTime.now().millisecondsSinceEpoch % 1000,
+        channelKey: 'basic_channel',
+        title: 'Membership Expiration Reminder',
+        body: 'Hi $fullName, your membership expires in $daysTillExpired days.',
+        notificationLayout: NotificationLayout.Default,
+      ),
+
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("MMS Gym Application, Welcome ${fullName}", style: TextStyle(fontSize: 15),),
+        title: Text("MMS Gym Application", style: TextStyle(fontSize: 15),),
+
         backgroundColor: Colors.grey,
-        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => LoginBase()),
                     (Route<dynamic> route) => false,
               );
             },
@@ -143,44 +170,7 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
         child: Column(
           children: [
             SizedBox(height: 15,),
-            ElevatedButton(onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RenewMembershipPage(docId, (daysTillExpired), expireDate )));
-            }, child: Text("Renew Membsership"),
-              style: ElevatedButton.styleFrom(
-              minimumSize: Size(200, 44),
-              backgroundColor: Colors.grey,
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),),),
-            SizedBox(height: 15,),
-            ElevatedButton(onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MemberAlterAccount(docId),
-                ),
-              );
-
-            }, child: Text("Alter Account"), style: ElevatedButton.styleFrom(
-              minimumSize: Size(200, 44),
-              backgroundColor: Colors.grey,
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),),),
-
-            SizedBox(height: 15,),
-            ElevatedButton(onPressed: () {
-
-            }
-            , child: Text("View Location on Map"), style: ElevatedButton.styleFrom(
-                minimumSize: Size(200, 44),
-                backgroundColor: Colors.grey,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),),),
+            Image.network("https://images.pexels.com/photos/260352/pexels-photo-260352.jpeg", height: 300,),
             SizedBox(height: 15,),
             Text("Current Membership Status is: $status"),
             SizedBox(height: 15,),
@@ -218,6 +208,14 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
             ),
           ],
         ),
+      ),
+      drawer: AppDrawer(
+        docId: docId,
+        userRole: 'member',
+        fullName: fullName,
+        status: status,
+        daysTillExpired: daysTillExpired,
+        expireDate: expireDate,
       ),
     );
   }
