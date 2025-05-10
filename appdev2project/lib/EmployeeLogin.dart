@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'createMemberAccount.dart';
 import 'employeeMainMenuPage.dart';
+import 'adminMainPage.dart';
 
 class EmployeeLogin extends StatefulWidget {
   @override
@@ -50,10 +51,21 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
             .get();
 
         if (snapshot.docs.isNotEmpty) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => EmployeeMainMenuPage(snapshot.docs.first.id)),
-          );
+          var userData = snapshot.docs.first.data() as Map<String, dynamic>;
+          String userType = userData['type'] ?? 'employee';
+
+          if (userType == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminMainPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => EmployeeMainMenuPage(snapshot.docs.first.id)),
+            );
+          }
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("No Firestore record found for this employee.")),
