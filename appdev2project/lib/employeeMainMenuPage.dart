@@ -88,7 +88,7 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
           children: [
             SizedBox(height: 15),
             // Fallback option for broken image
-            Image.asset('assets/gym_banner.png', width: 350, errorBuilder: (context, error, stackTrace) {
+            Image.asset('assets/gymAppLogo.png', width: 350, errorBuilder: (context, error, stackTrace) {
               return Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text("Welcome to your dashboard!", style: TextStyle(fontSize: 18)),

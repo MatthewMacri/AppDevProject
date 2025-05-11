@@ -177,7 +177,7 @@ class _CancelMemberAccountState extends State<CancelMemberAccount> {
           ),
           child: Column(
             children: [
-              Text("Enter details to update a member's password", style: TextStyle(fontSize: 16)),
+              Text("Enter details to cancel a member's membership", style: TextStyle(fontSize: 16)),
               SizedBox(height: 10),
               TextField(
                 controller: memberUserID,
