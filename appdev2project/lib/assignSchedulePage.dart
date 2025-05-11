@@ -8,47 +8,87 @@ class AssignSchedulePage extends StatefulWidget {
 }
 
 class _AssignSchedulePageState extends State<AssignSchedulePage> {
-  final _emailController = TextEditingController();
-  final _scheduleController = TextEditingController();
+  final _authIdController = TextEditingController();
+  final Map<String, TextEditingController> _dayControllers = {
+    'Monday': TextEditingController(),
+    'Tuesday': TextEditingController(),
+    'Wednesday': TextEditingController(),
+    'Thursday': TextEditingController(),
+    'Friday': TextEditingController(),
+    'Saturday': TextEditingController(),
+    'Sunday': TextEditingController(),
+  };
 
   Future<void> assignSchedule() async {
-    String email = _emailController.text.trim();
-    String schedule = _scheduleController.text.trim();
+    String authId = _authIdController.text.trim();
+    print("Entered authId: '$authId'");
+
+    Map<String, String> schedule = {
+      for (var day in _dayControllers.keys)
+        day.toLowerCase(): _dayControllers[day]!.text.trim()
+    };
 
     try {
       var snapshot = await FirebaseFirestore.instance
-          .collection('employees')
-          .where('email', isEqualTo: email)
+          .collection('users')
+          .where('authId', isEqualTo: authId)
           .limit(1)
           .get();
+
+      print('Found ${snapshot.docs.length} matching document(s)');
 
       if (snapshot.docs.isNotEmpty) {
         String docId = snapshot.docs.first.id;
         await FirebaseFirestore.instance
-            .collection('employees')
+            .collection('users')
             .doc(docId)
             .update({'schedule': schedule});
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Schedule assigned')));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Schedule assigned successfully.')),
+        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Employee not found')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Employee not found. Check the auth ID.')),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e')));
+      print('Error occurred: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Assign Schedule'), backgroundColor: Colors.grey),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      appBar: AppBar(
+        title: Text('Assign Weekly Schedule'),
+        backgroundColor: Colors.grey,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Employee Email')),
-            TextField(controller: _scheduleController, decoration: InputDecoration(labelText: 'Weekly Schedule')),
+            TextField(
+              controller: _authIdController,
+              decoration: InputDecoration(labelText: 'Employee Auth ID'),
+            ),
             SizedBox(height: 20),
-            ElevatedButton(onPressed: assignSchedule, child: Text('Assign')),
+            for (var day in _dayControllers.keys)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TextField(
+                  controller: _dayControllers[day],
+                  decoration: InputDecoration(labelText: '$day Schedule'),
+                ),
+              ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: assignSchedule,
+              child: Text('Assign Schedule'),
+            ),
           ],
         ),
       ),
