@@ -49,7 +49,7 @@ class _MemberAlterAccountState extends State<MemberAlterAccount> {
         print("DEBUG: Account Type Detected: $accountType");
 
         if (accountType == 'employee') {
-          currentPasswordInDB = 'FIREBASE_AUTH'; // ✅ Always set this for employees
+          currentPasswordInDB = 'FIREBASE_AUTH';
           print("DEBUG: Set currentPasswordInDB = FIREBASE_AUTH for employee.");
         } else {
           currentPasswordInDB = data['password'] ?? '';
@@ -190,7 +190,7 @@ class _MemberAlterAccountState extends State<MemberAlterAccount> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application, Alter User Info", style: TextStyle(fontSize: 15)),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       body: Center(
         child: Column(
@@ -203,7 +203,7 @@ class _MemberAlterAccountState extends State<MemberAlterAccount> {
             SizedBox(height: 20),
             Container(
               width: 300,
-              height: 420,
+              height: 350,
               decoration: BoxDecoration(
                 color: CupertinoColors.lightBackgroundGray,
                 borderRadius: BorderRadius.circular(10),

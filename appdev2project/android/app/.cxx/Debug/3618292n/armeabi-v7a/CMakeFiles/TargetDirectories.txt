@@ -1,0 +1,2 @@
+/Users/shahzaibahmed/Documents/GitHub/AppDevProject/appdev2project/android/app/.cxx/Debug/3618292n/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/shahzaibahmed/Documents/GitHub/AppDevProject/appdev2project/android/app/.cxx/Debug/3618292n/armeabi-v7a/CMakeFiles/rebuild_cache.dir

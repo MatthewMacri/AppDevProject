@@ -150,8 +150,7 @@ class _memberMainMenuPageState extends State<memberMainMenuPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application", style: TextStyle(fontSize: 15),),
-
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),

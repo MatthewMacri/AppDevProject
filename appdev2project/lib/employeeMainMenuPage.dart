@@ -61,7 +61,7 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application \nWelcome, $fullName", style: TextStyle(fontSize: 15)),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),

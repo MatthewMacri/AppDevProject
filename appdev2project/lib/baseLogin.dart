@@ -66,7 +66,7 @@ class _LoginBaseState extends State<LoginBase> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           Row(
             children: [

@@ -50,7 +50,9 @@ class _CreateEmployeePageState extends State<CreateEmployeePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Employee'), backgroundColor: Colors.grey),
+      appBar: AppBar(
+          title: Text('Create Employee'),
+          backgroundColor: Colors.blue),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

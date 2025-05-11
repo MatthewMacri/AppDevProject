@@ -65,7 +65,7 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Assign Weekly Schedule'),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
