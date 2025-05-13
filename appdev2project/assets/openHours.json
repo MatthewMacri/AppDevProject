@@ -21,10 +21,10 @@
   },
   "saturday": {
     "open": "06:00",
-    "close": "00:00"
+    "close": "23:59"
   },
   "sunday": {
     "open": "06:00",
-    "close": "00:00"
+    "close": "23:59"
   }
 }

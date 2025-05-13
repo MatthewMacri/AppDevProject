@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
+import 'assignSchedulePage.dart';
+import 'createEmployee.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -41,9 +44,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: LoginBase(),
+      routes: {
+        '/assignSchedule': (context) => AssignSchedulePage(), // create this page
+        '/createEmployee': (context) => CreateEmployeePage(), // create this page
+      },
     );
   }
 }
+
 
 class LoginBase extends StatefulWidget {
   @override
@@ -58,7 +66,7 @@ class _LoginBaseState extends State<LoginBase> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           Row(
             children: [
@@ -79,8 +87,13 @@ class _LoginBaseState extends State<LoginBase> {
           SizedBox(width: 10), // Add spacing on the right edge
         ],
       ),
-      body: Center(
-        child: isEmployee ? EmployeeLogin() : MemberLogin(),
+      body: Column(
+        children: [
+          Image.asset('assets/gymAppLogo.png', width: 200, height: 200,),
+          Center(
+            child: isEmployee ? EmployeeLogin() : MemberLogin(),
+          ),
+        ],
       ),
     );
   }

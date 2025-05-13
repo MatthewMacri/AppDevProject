@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:appdev2project/memberAlterAccount.dart';
-import 'package:appdev2project/renewMembershipPage.dart';
-import 'package:appdev2project/banMemberAccount.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'baseLogin.dart';
-import 'unused/loginpage.dart';
-import 'package:appdev2project/customDrawer.dart'; // Assuming you have this for Drawer
+import 'package:appdev2project/customDrawer.dart';
 
 class EmployeeMainMenuPage extends StatefulWidget {
-  String docId;
+  final String docId;
   EmployeeMainMenuPage(this.docId);
 
   @override
@@ -18,85 +13,47 @@ class EmployeeMainMenuPage extends StatefulWidget {
 }
 
 class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  String docId;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final String docId;
+
   String userId = "";
   String fullName = "";
-  Map<String, dynamic>? openingHours;
+  Map<String, dynamic> schedule = {};
 
   _EmployeeMainMenuPageState(this.docId);
-
-  Future<void> _fetchData() async {
-    DocumentSnapshot snapshot = await firestore.collection('users').doc(docId).get();
-
-    Map<String, dynamic> currentMember = snapshot.data() as Map<String, dynamic>;
-
-    setState(() {
-      userId = currentMember['userId'];
-      fullName = currentMember['fullName'];
-    });
-  }
-
-  Future<void> _fetchOpeningHours() async {
-    String jsonString = await rootBundle.loadString('assets/openHours.json');
-    setState(() {
-      openingHours = json.decode(jsonString);
-    });
-  }
-
-  int _getCurrentDay() {
-    return DateTime.now().weekday;
-  }
-
-  String _getGymStatus() {
-    if (openingHours == null) return "Loading opening hours...";
-
-    int currentDay = _getCurrentDay();
-    String dayName = _getDayName(currentDay);
-
-    if (openingHours!.containsKey(dayName)) {
-      String openTimeStr = openingHours![dayName]['open'];
-      String closeTimeStr = openingHours![dayName]['close'];
-
-      DateTime now = DateTime.now();
-      DateTime openTime = _parseTime(now, openTimeStr);
-      DateTime closeTime = _parseTime(now, closeTimeStr);
-
-      if (now.isAfter(openTime) && now.isBefore(closeTime)) {
-        return "open.";
-      } else {
-        return "closed.";
-      }
-    } else {
-      return "";
-    }
-  }
-
-  String _getDayName(int day) {
-    switch (day) {
-      case 1: return 'monday';
-      case 2: return 'tuesday';
-      case 3: return 'wednesday';
-      case 4: return 'thursday';
-      case 5: return 'friday';
-      case 6: return 'saturday';
-      case 7: return 'sunday';
-      default: return '';
-    }
-  }
-
-  DateTime _parseTime(DateTime now, String timeStr) {
-    List<String> parts = timeStr.split(':');
-    int hour = int.parse(parts[0]);
-    int minute = int.parse(parts[1]);
-    return DateTime(now.year, now.month, now.day, hour, minute);
-  }
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
-    _fetchOpeningHours();
+    _fetchEmployeeData();
+  }
+
+  Future<void> _fetchEmployeeData() async {
+    final currentUid = FirebaseAuth.instance.currentUser!.uid;
+
+    final snapshot = await firestore
+        .collection('users')
+        .where('authId', isEqualTo: currentUid)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data();
+
+      setState(() {
+        userId = data['userId'] ?? '';
+        fullName = data['fullName'] ?? '';
+        schedule = Map<String, dynamic>.from(data['schedule'] ?? {});
+      });
+    }
+  }
+
+  String capitalize(String text) =>
+      text.isNotEmpty ? text[0].toUpperCase() + text.substring(1) : text;
+
+  String formatTime(String? time) {
+    if (time == null || time.trim() == '0' || time.trim() == '-') return 'Off';
+    return time;
   }
 
   @override
@@ -104,7 +61,7 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MMS Gym Application \nWelcome, $fullName", style: TextStyle(fontSize: 15)),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -130,26 +87,61 @@ class _EmployeeMainMenuPageState extends State<EmployeeMainMenuPage> {
         child: Column(
           children: [
             SizedBox(height: 15),
-            Image.network("https://wod.guru/wp-content/uploads/2025/03/7-10.png", width: 350,),
+            // Fallback option for broken image
+            Image.asset('assets/gymAppLogo.png', width: 350, errorBuilder: (context, error, stackTrace) {
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text("Welcome to your dashboard!", style: TextStyle(fontSize: 18)),
+              );
+            }),
             SizedBox(height: 15),
-            Text("The gym is currently: ${_getGymStatus()}"),
-            SizedBox(height: 35),
-            openingHours == null
-                ? Text("Loading opening hours...")
-                : Container(
-              padding: EdgeInsets.all(10),
-              margin: EdgeInsets.only(top: 20),
+            Container(
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Opening Hours:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  for (var day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
-                    Text('$day: ${openingHours![day]['open']} - ${openingHours![day]['close']}'),
+                  Text(
+                    'Your Weekly Schedule',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  SizedBox(height: 12),
+                  if (schedule.isEmpty)
+                    Text('No schedule assigned.', style: TextStyle(fontSize: 16)),
+                  for (var day in [
+                    'monday',
+                    'tuesday',
+                    'wednesday',
+                    'thursday',
+                    'friday',
+                    'saturday',
+                    'sunday',
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            capitalize(day),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            formatTime(schedule[day]),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: formatTime(schedule[day]) == 'Off' ? Colors.grey : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),

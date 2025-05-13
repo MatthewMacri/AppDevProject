@@ -133,7 +133,7 @@ class _RenewMembershipPageState extends State<RenewMembershipPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Renew Membership"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       drawer: AppDrawer(
         docId: widget.docId,

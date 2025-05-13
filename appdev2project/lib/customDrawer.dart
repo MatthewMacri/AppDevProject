@@ -1,3 +1,4 @@
+import 'package:appdev2project/cancelMember.dart';
 import 'package:flutter/material.dart';
 import 'package:appdev2project/memberAlterAccount.dart';
 import 'package:appdev2project/renewMembershipPage.dart';
@@ -10,6 +11,7 @@ import 'unused/loginpage.dart';
 import 'viewAllMembershipEmployee.dart';
 import 'viewAllBannedMembers.dart';
 import 'viewAllExpiredMembers.dart';
+import 'resetMemberPassword.dart';
 
 class AppDrawer extends StatelessWidget {
   final String docId;
@@ -37,7 +39,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.grey,
+              color: Colors.lightBlue,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -150,6 +152,24 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) => BanMemberAccount(docId),
+                ));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.lock_reset),
+              title: Text('Reset Member Password'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => ResetMemberPassword(docId),
+                ));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.cancel, color: Colors.red,),
+              title: Text('Cancel Member Subscription'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => CancelMemberAccount(docId),
                 ));
               },
             ),

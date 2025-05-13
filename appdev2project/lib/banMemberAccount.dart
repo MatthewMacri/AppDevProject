@@ -165,7 +165,7 @@ class _BanMemberAccountState extends State<BanMemberAccount> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Permanently Ban Member"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       drawer: AppDrawer(
         docId: docId,

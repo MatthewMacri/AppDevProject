@@ -153,7 +153,7 @@ class _CreateMemberAccountState extends State<CreateMemberAccount> {
     return Scaffold(
         appBar: AppBar(
           title: Text("MMS Gym Application"),
-          backgroundColor: Colors.grey,
+          backgroundColor: Colors.blue,
         ),
         body: Center(
           child: Column(
