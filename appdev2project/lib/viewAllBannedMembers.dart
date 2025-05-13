@@ -28,7 +28,7 @@ class ViewBannedMembersScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("View Banned Members"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       drawer: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance.collection('users').doc(employeeDocId).get(),

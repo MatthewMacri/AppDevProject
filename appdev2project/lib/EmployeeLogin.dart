@@ -89,7 +89,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
     return Center(
       child: Column(
         children: [
-          SizedBox(height: 50),
           Container(
             width: 300,
             padding: EdgeInsets.all(16),

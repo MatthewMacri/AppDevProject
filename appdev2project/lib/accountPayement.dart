@@ -55,7 +55,9 @@ class _MemberAccountPaymentState extends State<MemberAccountPayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Payment Information"), backgroundColor: Colors.grey),
+      appBar: AppBar(
+          title: Text("Payment Information"),
+          backgroundColor: Colors.blue),
       body: Center(
         child: Container(
           width: 300,

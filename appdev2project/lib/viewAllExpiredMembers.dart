@@ -28,7 +28,7 @@ class ViewExpiredMembersScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("View Expired Members"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       drawer: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance.collection('users').doc(employeeDocId).get(),

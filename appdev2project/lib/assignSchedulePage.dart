@@ -8,7 +8,7 @@ class AssignSchedulePage extends StatefulWidget {
 }
 
 class _AssignSchedulePageState extends State<AssignSchedulePage> {
-  final _authIdController = TextEditingController();
+  final _userIdController = TextEditingController();
   final Map<String, TextEditingController> _dayControllers = {
     'Monday': TextEditingController(),
     'Tuesday': TextEditingController(),
@@ -20,8 +20,18 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
   };
 
   Future<void> assignSchedule() async {
-    String authId = _authIdController.text.trim();
-    print("Entered authId: '$authId'");
+    String userId = _userIdController.text.trim();
+    print("Entered userId: '$userId'");
+
+    for (var day in _dayControllers.keys) {
+      String value = _dayControllers[day]!.text.trim();
+      if (!isValidTimeFormat(value)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Invalid format for $day. Use format like: 08:00-14:00 or 0/- for day off.")),
+        );
+        return;
+      }
+    }
 
     Map<String, String> schedule = {
       for (var day in _dayControllers.keys)
@@ -31,7 +41,8 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
     try {
       var snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .where('authId', isEqualTo: authId)
+          .where('userId', isEqualTo: userId)
+          .where('type', isEqualTo: 'employee')
           .limit(1)
           .get();
 
@@ -47,9 +58,10 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Schedule assigned successfully.')),
         );
+        clearAllFields();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Employee not found. Check the auth ID.')),
+          SnackBar(content: Text('Employee not found. Check the user ID.')),
         );
       }
     } catch (e) {
@@ -60,20 +72,41 @@ class _AssignSchedulePageState extends State<AssignSchedulePage> {
     }
   }
 
+  void clearAllFields() {
+    _userIdController.clear();
+    for (var controller in _dayControllers.values) {
+      controller.clear();
+    }
+  }
+
+
+  bool isValidTimeFormat(String input) {
+    if (input.isEmpty || input == '0' || input == '-') return true;
+    if (input.contains('-')) {
+      var parts = input.split('-');
+      if (parts.length == 2) {
+        final timeRegex = RegExp(r'^\d{2}:\d{2}$');
+        return timeRegex.hasMatch(parts[0]) && timeRegex.hasMatch(parts[1]);
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Assign Weekly Schedule'),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
+            Text("Format ex: 08:00-15:00 \n Enter 0 or - for day off"),
             TextField(
-              controller: _authIdController,
-              decoration: InputDecoration(labelText: 'Employee Auth ID'),
+              controller: _userIdController,
+              decoration: InputDecoration(labelText: 'Employee User ID'),
             ),
             SizedBox(height: 20),
             for (var day in _dayControllers.keys)

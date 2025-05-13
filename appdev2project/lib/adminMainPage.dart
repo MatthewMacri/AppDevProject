@@ -16,7 +16,7 @@ class AdminMainPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Admin Page"),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -29,7 +29,7 @@ class AdminMainPage extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.grey),
+              decoration: BoxDecoration(color: Colors.lightBlue),
               child: Text('Admin Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(

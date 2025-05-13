@@ -188,7 +188,7 @@ class _MyMapState extends State<MyMap> {
     return ElevatedButton(
       onPressed: () => _getDirections(mode),
       style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
+        backgroundColor: isSelected ? Colors.blueAccent : Colors.grey[300],
       ),
       child: Text(
         '$label',
@@ -207,7 +207,7 @@ class _MyMapState extends State<MyMap> {
       home: Scaffold(
         appBar: AppBar(
           title: Text('Directions to the gym'),
-          backgroundColor: Colors.grey,
+          backgroundColor: Colors.blue,
         ),
         body: _source == null
             ? Center(child: CircularProgressIndicator())
